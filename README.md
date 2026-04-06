@@ -1,76 +1,85 @@
 # nodes-check
 
-`nodes-check` 鏄竴涓潰鍚戣蒋璺敱鍦烘櫙鐨勪唬鐞嗚妭鐐圭瓫閫変笌 Cloudflare 鍙戝竷宸ュ叿銆?
-瀹冪殑鏍稿績娴佺▼鏄細
-- 浠庤闃呬腑鍙彁鍙?`IP / 绔彛 / 鍚嶇О`
-- 鍚堝苟鍘嗗彶鎴愬姛姹?- TCP 棰勭瓫
-- 涓よ疆 `xray-core` 鐪熷欢杩熸祴璇?- 鎸夊垎绫诲拰鎺ㄩ€侀厤缃敓鎴愭渶缁堢粨鏋?- 鎺ㄩ€佸埌 Cloudflare Worker/KV 涓?Cloudflare DNS
+`nodes-check` 是一个面向软路由场景的代理节点筛选与 Cloudflare 发布工具。
 
-## 鍔熻兘姒傝
+核心流程：
+- 从订阅中只提取 `IP / 端口 / 名称`
+- 合并历史成功池
+- TCP 预筛
+- 两轮 `xray-core` 真延迟测试
+- 按分类和推送配置生成最终结果
+- 推送到 Cloudflare Worker/KV 与 Cloudflare DNS
 
-- 鍐呯疆 `xray-core` 鐪熷欢杩熸祴璇?- WebUI + token 鐧诲綍淇濇姢
-- 鏀寔澶氭潯璁㈤槄閾炬帴
-- 鏀寔瀹氭椂鑷姩杩愯
-- 鏀寔鍘嗗彶鎴愬姛姹犲鐢?- 鏀寔 Cloudflare Worker/KV 鎺ㄩ€?- 鏀寔 Cloudflare DNS 鎺ㄩ€?- 鏀寔 Docker 閮ㄧ讲
-- 鏀寔 GitHub Actions 鑷姩鍙戝竷闀滃儚鍒?GHCR / Docker Hub
+## 功能概览
 
-## 褰撳墠鍒嗙被瑙勫垯
+- 内置 `xray-core` 真延迟测试
+- WebUI + token 登录保护
+- 支持多条订阅链接
+- 支持定时自动运行
+- 支持历史成功池复用
+- 支持 Cloudflare Worker/KV 推送
+- 支持 Cloudflare DNS 推送
+- 支持 Docker 部署
+- 支持通过 GitHub 自动发布 GHCR 镜像
 
-澶у尯绫伙細
-- 棣欐腐
-- 浜氭床
-- 娆ф床
-- 缇庢床
-- 鍏朵粬鍖哄煙
+## 当前分类规则
 
-杩愯惀鍟嗙被锛?- 绉诲姩
-- 鑱旈€?- 鐢典俊
-- 瀹樻柟浼橀€?
-璇存槑锛?- Cloudflare IP 榛樿涓嶈繘鍏ユ櫘閫氬ぇ鍖恒€?- Cloudflare IP 鑻ユ湭鍛戒腑绉诲姩/鑱旈€?鐢典俊锛屼細杩涘叆 `瀹樻柟浼橀€塦銆?- `鍏朵粬鍖哄煙` 琛ㄧず闈?Cloudflare IP锛屼絾鏈褰掑叆棣欐腐/浜氭床/娆ф床/缇庢床銆?
-## 鏁忔劅淇℃伅璇存槑
+大区类：
+- 香港
+- 亚洲
+- 欧洲
+- 美洲
+- 其他区域
 
-浠撳簱涓殑 `configs/config.yaml` 鏄劚鏁忓悗鐨勬寮忛粯璁ら厤缃紝鍙互鐩存帴琚媺鍙栧拰鎸傝浇浣跨敤銆?
-寤鸿鍋氭硶锛?- 淇濈暀浠撳簱閲岀殑 `configs/config.yaml` 浣滀负榛樿妯℃澘
-- 鍦ㄩ儴缃插墠鎶婂叾涓殑鐪熷疄 token銆佸煙鍚嶃€乁UID 鏀规垚浣犺嚜宸辩殑鍊?- 濡傞渶淇濈暀绉佹湁鍓湰锛屽彲鍙﹀缓 `configs/*.local.yaml`
-- 涓嶈鎶婄湡瀹炴晱鎰熷€兼彁浜ゅ洖浠撳簱
+运营商类：
+- 移动
+- 联通
+- 电信
+- 官方优选
 
-## 鏈湴杩愯
+说明：
+- Cloudflare IP 默认不进入普通大区。
+- Cloudflare IP 若未命中移动/联通/电信，会进入 `官方优选`。
+- `其他区域` 表示非 Cloudflare IP，但未被归入香港/亚洲/欧洲/美洲。
 
-### 1. 鍑嗗 Go
+## 配置说明
 
-寤鸿 Go `1.22+`銆?
-### 2. 淇敼閰嶇疆
+仓库中的 [config.yaml](D:\project\nodes_check\configs\config.yaml) 是脱敏后的默认配置，可以直接作为模板使用。
 
-鑷冲皯闇€瑕佸～鍐欙細
+部署前至少需要修改这些内容：
 - `web.auth_token`
 - `probe.template.*`
 - `cloudflare.worker.*`
 - `cloudflare.dns.*`
 
-### 3. 鍚姩 WebUI
+不要把真实 token、域名、UUID 再提交回仓库。
 
-Windows PowerShell锛?
+## 本地运行
+
+Windows PowerShell：
+
 ```powershell
 .\scripts\run-local.ps1
 ```
 
-Linux / WSL锛?
+Linux / WSL：
+
 ```bash
 sh ./scripts/run-local.sh
 ```
 
-鎴栫洿鎺ワ細
+或直接：
 
 ```bash
 go run ./cmd/server -config ./configs/config.yaml
 ```
 
-榛樿璁块棶鍦板潃锛?- [http://localhost:18808](http://localhost:18808)
+默认访问地址：
+- [http://localhost:18808](http://localhost:18808)
 
-## Docker 閮ㄧ讲
+## Docker 部署
 
-### 鏂瑰紡涓€锛氭湰鍦版簮鐮佹瀯寤?
-閫傚悎浣犺嚜宸辨湁婧愮爜鐩綍鐨勬満鍣細
+### 本地源码构建
 
 ```bash
 docker build -t nodes-check .
@@ -82,34 +91,17 @@ docker run -d \
   nodes-check
 ```
 
-鎴栵細
+或：
 
 ```bash
 docker compose up -d --build
 ```
 
-璇存槑锛?- 瀹瑰櫒榛樿璇诲彇 `/app/configs/config.yaml`
-- 濡傛灉浣犳寕杞戒簡 `./configs:/app/configs`锛屽涓绘満鐩綍閲屽繀椤绘湁 `config.yaml`
+说明：
+- 容器默认读取 `/app/configs/config.yaml`
+- 如果挂载了 `./configs:/app/configs`，宿主机目录里必须有 `config.yaml`
 
-### 鏂瑰紡浜岋細椋炵墰 / NAS 鐩存帴鎷夐暅鍍?
-鏇存帹鑽愪紭鍏堜娇鐢?Docker Hub 闀滃儚锛涘緢澶?NAS 瀵?`docker.io` 鐨勬媺鍙栭€熷害閫氬父姣?`ghcr.io` 鏇寸ǔ瀹氥€?
-#### Docker Hub
-
-```yaml
-services:
-  nodes-check:
-    image: troywww/nodes-check:latest
-    container_name: nodes-check
-    ports:
-      - "18808:18808"
-    volumes:
-      - ./configs:/app/configs
-      - ./runtime:/app/runtime
-    restart: unless-stopped
-    command: ["/app/nodes-check", "-config", "/app/configs/config.yaml"]
-```
-
-#### GHCR
+### 飞牛 / NAS 直接拉 GHCR 镜像
 
 ```yaml
 services:
@@ -125,45 +117,21 @@ services:
     command: ["/app/nodes-check", "-config", "/app/configs/config.yaml"]
 ```
 
-璇存槑锛?- 杩欎袱绉嶆柟寮忛兘涓嶉渶瑕?NAS 鐜板満 `build`
-- 浣犲彧闇€瑕佸噯澶囪嚜宸辩殑閰嶇疆鐩綍鍜岃繍琛岀洰褰?- 濡傛灉 GHCR 鍖呴粯璁ゆ槸绉佹湁鐨勶紝闇€瑕佸厛鍦?GitHub Packages 閲屾妸瀹冩敼鎴愬叕寮€
+说明：
+- 这种方式不需要 NAS 现场 `build`
+- 你只需要准备自己的 `configs` 和 `runtime` 目录
+- 如果 GHCR 包默认是私有的，需要先在 GitHub Packages 里把它改成公开
 
-## GitHub Actions 鑷姩鍙戝竷闀滃儚
+## 镜像说明
 
-浠撳簱鍐呯疆宸ヤ綔娴侊細
-- `.github/workflows/publish-image.yml`
+- Linux 镜像只包含 Linux 版 `xray`
+- Windows 版 `xray.exe` 不会进入 Docker Linux 镜像
+- 镜像内只保留运行必需文件
+- `runtime` 目录在镜像中只创建空目录，实际运行数据建议通过卷挂载保存
 
-瑙﹀彂鏂瑰紡锛?- push 鍒?`main`
-- push `v*` 鏍囩
-- 鎵嬪姩瑙﹀彂 `workflow_dispatch`
+## 说明
 
-榛樿鍙戝竷锛?- `ghcr.io/troywww/nodes-check:latest`
-
-濡傛灉浣犻厤缃簡浠撳簱 Secrets锛?- `DOCKERHUB_USERNAME`
-- `DOCKERHUB_TOKEN`
-
-杩樹細鍚屾鍙戝竷鍒帮細
-- `docker.io/troywww/nodes-check:latest`
-
-## Docker Hub 閰嶇疆鏂规硶
-
-鍦?GitHub 浠撳簱 `Settings -> Secrets and variables -> Actions` 閲屾柊澧烇細
-
-- `DOCKERHUB_USERNAME`
-- `DOCKERHUB_TOKEN`
-
-鍏朵腑锛?- `DOCKERHUB_USERNAME` 鏄綘鐨?Docker Hub 鐢ㄦ埛鍚?- `DOCKERHUB_TOKEN` 寤鸿浣跨敤 Docker Hub Access Token锛屼笉瑕佺洿鎺ョ敤瀵嗙爜
-
-閰嶇疆濂藉悗锛岄噸鏂?push 涓€娆?`main`锛屾垨鎵嬪姩杩愯涓€娆?`publish-image` 宸ヤ綔娴佸嵆鍙€?
-## 璇存槑
-
-- `final_ips.txt` 鏄渶缁?KV 鍐呭鏉ユ簮鏂囦欢
-- 鍘嗗彶姹犱繚瀛樺湪 `runtime/cache/history_valid_nodes.txt`
-- 鑻ユ湰杞ǔ瀹氭睜涓虹┖锛屽巻鍙叉睜涓嶄細琚竻绌?- 鑻ユ煇涓繍钀ュ晢鍒嗙被涔熼厤缃繘 KV锛屽垯浼氫紭鍏堝啓瀵瑰簲鍩熷悕鑰屼笉鏄８ IP
-
-## 镜像体积说明
-
-- Linux 镜像只包含 Linux 版 xray。
-- Windows 版 xray.exe 不会进入 Docker Linux 镜像。
-- 镜像内只保留运行必需的 config.yaml、subscription_urls.txt 和 Linux xray 文件。
-- untime 目录在镜像中只创建空目录，实际运行数据建议通过卷挂载保存。
+- `final_ips.txt` 是最终 KV 内容来源文件
+- 历史池保存在 `runtime/cache/history_valid_nodes.txt`
+- 若本轮稳定池为空，历史池不会被清空
+- 若某个运营商分类也配置进 KV，则会优先写对应域名而不是裸 IP
