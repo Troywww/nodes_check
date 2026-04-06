@@ -37,7 +37,7 @@ probe:
 
 output:
   dir: "../runtime/outputs"
-  name_prefix: "【周更·炒饭】"
+  name_prefix: "\u3010\u5468\u66f4\u00b7\u7092\u996d\u3011"
 
 cache:
   history_file: "../runtime/cache/history_valid_nodes.txt"
@@ -46,23 +46,23 @@ publish:
   kv:
     enabled: true
     categories:
-      香港: 5
-      亚洲: 5
-      欧洲: 5
-      美洲: 5
-      其他区域: 5
-      移动: 0
-      联通: 0
-      电信: 0
-      官方优选: 0
+      "\u9999\u6e2f": 5
+      "\u4e9a\u6d32": 5
+      "\u6b27\u6d32": 5
+      "\u7f8e\u6d32": 5
+      "\u5176\u4ed6\u533a\u57df": 5
+      "\u79fb\u52a8": 0
+      "\u8054\u901a": 0
+      "\u7535\u4fe1": 0
+      "\u5b98\u65b9\u4f18\u9009": 0
 
   dns:
     enabled: true
     categories:
-      移动: 3
-      联通: 3
-      电信: 3
-      官方优选: 3
+      "\u79fb\u52a8": 3
+      "\u8054\u901a": 3
+      "\u7535\u4fe1": 3
+      "\u5b98\u65b9\u4f18\u9009": 3
 
 cloudflare:
   worker:
@@ -73,7 +73,7 @@ cloudflare:
   dns:
     api_token: "replace-with-your-cloudflare-api-token"
     zone_id: "replace-with-your-zone-id"
-    移动: "cmcc.example.com"
-    联通: "cu.example.com"
-    电信: "ct.example.com"
-    官方优选: "official.example.com"
+    "\u79fb\u52a8": "cmcc.example.com"
+    "\u8054\u901a": "cu.example.com"
+    "\u7535\u4fe1": "ct.example.com"
+    "\u5b98\u65b9\u4f18\u9009": "official.example.com"

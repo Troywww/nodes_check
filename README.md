@@ -1,85 +1,64 @@
 # nodes-check
 
-`nodes-check` 是一个面向软路由场景的代理节点筛选与 Cloudflare 发布工具。
+`nodes-check` 鏄竴涓潰鍚戣蒋璺敱鍦烘櫙鐨勪唬鐞嗚妭鐐圭瓫閫変笌 Cloudflare 鍙戝竷宸ュ叿銆?
+鏍稿績娴佺▼锛?- 浠庤闃呬腑鍙彁鍙?`IP / 绔彛 / 鍚嶇О`
+- 鍚堝苟鍘嗗彶鎴愬姛姹?- TCP 棰勭瓫
+- 涓よ疆 `xray-core` 鐪熷欢杩熸祴璇?- 鎸夊垎绫诲拰鎺ㄩ€侀厤缃敓鎴愭渶缁堢粨鏋?- 鎺ㄩ€佸埌 Cloudflare Worker/KV 涓?Cloudflare DNS
 
-核心流程：
-- 从订阅中只提取 `IP / 端口 / 名称`
-- 合并历史成功池
-- TCP 预筛
-- 两轮 `xray-core` 真延迟测试
-- 按分类和推送配置生成最终结果
-- 推送到 Cloudflare Worker/KV 与 Cloudflare DNS
+## 鍔熻兘姒傝
 
-## 功能概览
+- 鍐呯疆 `xray-core` 鐪熷欢杩熸祴璇?- WebUI + token 鐧诲綍淇濇姢
+- 鏀寔澶氭潯璁㈤槄閾炬帴
+- 鏀寔瀹氭椂鑷姩杩愯
+- 鏀寔鍘嗗彶鎴愬姛姹犲鐢?- 鏀寔 Cloudflare Worker/KV 鎺ㄩ€?- 鏀寔 Cloudflare DNS 鎺ㄩ€?- 鏀寔 Docker 閮ㄧ讲
+- 鏀寔閫氳繃 GitHub 鑷姩鍙戝竷 GHCR 闀滃儚
 
-- 内置 `xray-core` 真延迟测试
-- WebUI + token 登录保护
-- 支持多条订阅链接
-- 支持定时自动运行
-- 支持历史成功池复用
-- 支持 Cloudflare Worker/KV 推送
-- 支持 Cloudflare DNS 推送
-- 支持 Docker 部署
-- 支持通过 GitHub 自动发布 GHCR 镜像
+## 褰撳墠鍒嗙被瑙勫垯
 
-## 当前分类规则
+澶у尯绫伙細
+- 棣欐腐
+- 浜氭床
+- 娆ф床
+- 缇庢床
+- 鍏朵粬鍖哄煙
 
-大区类：
-- 香港
-- 亚洲
-- 欧洲
-- 美洲
-- 其他区域
+杩愯惀鍟嗙被锛?- 绉诲姩
+- 鑱旈€?- 鐢典俊
+- 瀹樻柟浼橀€?
+璇存槑锛?- Cloudflare IP 榛樿涓嶈繘鍏ユ櫘閫氬ぇ鍖恒€?- Cloudflare IP 鑻ユ湭鍛戒腑绉诲姩/鑱旈€?鐢典俊锛屼細杩涘叆 `瀹樻柟浼橀€塦銆?- `鍏朵粬鍖哄煙` 琛ㄧず闈?Cloudflare IP锛屼絾鏈褰掑叆棣欐腐/浜氭床/娆ф床/缇庢床銆?
+## 閰嶇疆璇存槑
 
-运营商类：
-- 移动
-- 联通
-- 电信
-- 官方优选
-
-说明：
-- Cloudflare IP 默认不进入普通大区。
-- Cloudflare IP 若未命中移动/联通/电信，会进入 `官方优选`。
-- `其他区域` 表示非 Cloudflare IP，但未被归入香港/亚洲/欧洲/美洲。
-
-## 配置说明
-
-仓库中的 [config.yaml](D:\project\nodes_check\configs\config.yaml) 是脱敏后的默认配置，可以直接作为模板使用。
-
-部署前至少需要修改这些内容：
+浠撳簱涓殑 [config.yaml](D:\project\nodes_check\configs\config.yaml) 鏄劚鏁忓悗鐨勯粯璁ら厤缃紝鍙互鐩存帴浣滀负妯℃澘浣跨敤銆?
+閮ㄧ讲鍓嶈嚦灏戦渶瑕佷慨鏀硅繖浜涘唴瀹癸細
 - `web.auth_token`
 - `probe.template.*`
 - `cloudflare.worker.*`
 - `cloudflare.dns.*`
 
-不要把真实 token、域名、UUID 再提交回仓库。
+涓嶈鎶婄湡瀹?token銆佸煙鍚嶃€乁UID 鍐嶆彁浜ゅ洖浠撳簱銆?
+## 鏈湴杩愯
 
-## 本地运行
-
-Windows PowerShell：
-
+Windows PowerShell锛?
 ```powershell
 .\scripts\run-local.ps1
 ```
 
-Linux / WSL：
-
+Linux / WSL锛?
 ```bash
 sh ./scripts/run-local.sh
 ```
 
-或直接：
+鎴栫洿鎺ワ細
 
 ```bash
 go run ./cmd/server -config ./configs/config.yaml
 ```
 
-默认访问地址：
-- [http://localhost:18808](http://localhost:18808)
+榛樿璁块棶鍦板潃锛?- [http://localhost:18808](http://localhost:18808)
 
-## Docker 部署
+## Docker 閮ㄧ讲
 
-### 本地源码构建
+### 鏈湴婧愮爜鏋勫缓
 
 ```bash
 docker build -t nodes-check .
@@ -91,17 +70,16 @@ docker run -d \
   nodes-check
 ```
 
-或：
+鎴栵細
 
 ```bash
 docker compose up -d --build
 ```
 
-说明：
-- 容器默认读取 `/app/configs/config.yaml`
-- 如果挂载了 `./configs:/app/configs`，宿主机目录里必须有 `config.yaml`
+璇存槑锛?- 瀹瑰櫒榛樿璇诲彇 `/app/configs/config.yaml`
+- 濡傛灉鎸傝浇浜?`./configs:/app/configs`锛屽涓绘満鐩綍閲屽繀椤绘湁 `config.yaml`
 
-### 飞牛 / NAS 直接拉 GHCR 镜像
+### 椋炵墰 / NAS 鐩存帴鎷?GHCR 闀滃儚
 
 ```yaml
 services:
@@ -117,21 +95,18 @@ services:
     command: ["/app/nodes-check", "-config", "/app/configs/config.yaml"]
 ```
 
-说明：
-- 这种方式不需要 NAS 现场 `build`
-- 你只需要准备自己的 `configs` 和 `runtime` 目录
-- 如果 GHCR 包默认是私有的，需要先在 GitHub Packages 里把它改成公开
+璇存槑锛?- 杩欑鏂瑰紡涓嶉渶瑕?NAS 鐜板満 `build`
+- 浣犲彧闇€瑕佸噯澶囪嚜宸辩殑 `configs` 鍜?`runtime` 鐩綍
+- 濡傛灉 GHCR 鍖呴粯璁ゆ槸绉佹湁鐨勶紝闇€瑕佸厛鍦?GitHub Packages 閲屾妸瀹冩敼鎴愬叕寮€
 
-## 镜像说明
+## 闀滃儚璇存槑
 
-- Linux 镜像只包含 Linux 版 `xray`
-- Windows 版 `xray.exe` 不会进入 Docker Linux 镜像
-- 镜像内只保留运行必需文件
-- `runtime` 目录在镜像中只创建空目录，实际运行数据建议通过卷挂载保存
+- Linux 闀滃儚鍙寘鍚?Linux 鐗?`xray`
+- Windows 鐗?`xray.exe` 涓嶄細杩涘叆 Docker Linux 闀滃儚
+- 闀滃儚鍐呭彧淇濈暀杩愯蹇呴渶鏂囦欢
+- `runtime` 鐩綍鍦ㄩ暅鍍忎腑鍙垱寤虹┖鐩綍锛屽疄闄呰繍琛屾暟鎹缓璁€氳繃鍗锋寕杞戒繚瀛?
+## 璇存槑
 
-## 说明
-
-- `final_ips.txt` 是最终 KV 内容来源文件
-- 历史池保存在 `runtime/cache/history_valid_nodes.txt`
-- 若本轮稳定池为空，历史池不会被清空
-- 若某个运营商分类也配置进 KV，则会优先写对应域名而不是裸 IP
+- `final_ips.txt` 鏄渶缁?KV 鍐呭鏉ユ簮鏂囦欢
+- 鍘嗗彶姹犱繚瀛樺湪 `runtime/cache/history_valid_nodes.txt`
+- 鑻ユ湰杞ǔ瀹氭睜涓虹┖锛屽巻鍙叉睜涓嶄細琚竻绌?- 鑻ユ煇涓繍钀ュ晢鍒嗙被涔熼厤缃繘 KV锛屽垯浼氫紭鍏堝啓瀵瑰簲鍩熷悕鑰屼笉鏄８ IP

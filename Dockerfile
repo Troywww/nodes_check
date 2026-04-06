@@ -10,10 +10,11 @@ FROM debian:bookworm-slim
 WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates tzdata && rm -rf /var/lib/apt/lists/*
 COPY --from=builder /out/nodes-check /app/nodes-check
-COPY configs/config.yaml /app/configs/config.yaml
-COPY configs/subscription_urls.txt /app/configs/subscription_urls.txt
+COPY configs/config.yaml /app/defaults/config.yaml
+COPY configs/subscription_urls.txt /app/defaults/subscription_urls.txt
 COPY bin/xray-linux-64 /app/bin/xray-linux-64
-RUN mkdir -p /app/runtime/cache /app/runtime/logs /app/runtime/outputs \
-    && chmod +x /app/nodes-check /app/bin/xray-linux-64/xray
+COPY scripts/docker-entrypoint.sh /app/docker-entrypoint.sh
+RUN mkdir -p /app/configs /app/runtime/cache /app/runtime/logs /app/runtime/outputs /app/defaults \
+    && chmod +x /app/nodes-check /app/bin/xray-linux-64/xray /app/docker-entrypoint.sh
 EXPOSE 18808
-CMD ["/app/nodes-check", "-config", "/app/configs/config.yaml"]
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
