@@ -1,0 +1,14 @@
+﻿runtime/outputs/*
+!runtime/outputs/.gitkeep
+runtime/logs/*
+!runtime/logs/.gitkeep
+runtime/cache/*
+!runtime/cache/.gitkeep
+bin/*.zip
+/server
+/server.exe
+/xray-probe
+/xray-probe.exe
+*.log
+configs/config.yaml
+configs/*.local.yaml

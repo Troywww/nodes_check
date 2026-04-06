@@ -1,0 +1,79 @@
+﻿server:
+  listen: ":18808"
+  timezone: "Asia/Shanghai"
+
+web:
+  auth_token: "change-this-to-a-random-token"
+
+schedule:
+  enabled: false
+  interval_minutes: 360
+
+job:
+  concurrency: 6
+  repeat: 1
+  max_probe_candidates: 200
+  tcp_precheck_timeout_seconds: 3
+  probe_timeout_seconds: 8
+  startup_timeout_seconds: 4
+
+subscription:
+  file: "./subscription_urls.txt"
+
+probe:
+  xray_bin: "../bin/xray-linux-64/xray"
+  probe_url: "https://www.gstatic.com/generate_204"
+  phase1_max_delay_ms: 1500
+  phase2_max_delay_ms: 1000
+  template:
+    protocol: "vless"
+    uuid: "replace-with-your-vless-uuid"
+    password: ""
+    security: "tls"
+    transport: "ws"
+    sni: "replace-with-your-sni.example.com"
+    ws_host: "replace-with-your-host.example.com"
+    ws_path: "/?ed=2048"
+
+output:
+  dir: "../runtime/outputs"
+  name_prefix: "【周更·炒饭】"
+
+cache:
+  history_file: "../runtime/cache/history_valid_nodes.txt"
+
+publish:
+  kv:
+    enabled: true
+    categories:
+      香港: 5
+      亚洲: 5
+      欧洲: 5
+      美洲: 5
+      其他区域: 5
+      移动: 0
+      联通: 0
+      电信: 0
+      官方优选: 0
+
+  dns:
+    enabled: true
+    categories:
+      移动: 3
+      联通: 3
+      电信: 3
+      官方优选: 3
+
+cloudflare:
+  worker:
+    url: "https://your-worker.example.workers.dev"
+    token: "replace-with-your-worker-token"
+    key: "ip_asian"
+
+  dns:
+    api_token: "replace-with-your-cloudflare-api-token"
+    zone_id: "replace-with-your-zone-id"
+    移动: "cmcc.example.com"
+    联通: "cu.example.com"
+    电信: "ct.example.com"
+    官方优选: "official.example.com"
