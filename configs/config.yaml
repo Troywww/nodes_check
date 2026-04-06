@@ -1,79 +1,162 @@
 server:
+  # WebUI 监听地址。
+  # 默认 18808，尽量避免和常见服务端口冲突。
   listen: ":18808"
+
+  # 时区。
+  # 日志时间、任务调度时间都会使用这个时区。
   timezone: "Asia/Shanghai"
 
 web:
-  auth_token: "change-this-to-a-random-token"
+  # WebUI 登录令牌。
+  # 首次部署可先用默认值测试，正式使用建议改成你自己的私有值。
+  auth_token: "nodes-check"
 
 schedule:
+  # 是否启用定时运行。
   enabled: false
+
+  # 定时运行间隔，单位分钟。
+  # 例如 360 表示每 6 小时运行一次。
   interval_minutes: 360
 
 job:
+  # 并发数。
+  # 当前同时用于 TCP 预筛和真延迟测试并发。
+  # 建议 4-8，机器性能较弱可先用 3-4。
   concurrency: 6
+
+  # 每个节点真延迟测试次数。
+  # 当前建议保持 1，加快整体速度。
   repeat: 1
+
+  # 最多允许多少个候选进入真延迟测试。
+  # 候选越多越全面，但整体耗时也越长。
   max_probe_candidates: 200
+
+  # TCP 预筛超时，单位秒。
+  # 用于快速剔除明显连不上的 IP。
   tcp_precheck_timeout_seconds: 3
+
+  # 单次真延迟测试超时，单位秒。
   probe_timeout_seconds: 8
+
+  # xray 启动等待超时，单位秒。
   startup_timeout_seconds: 4
 
 subscription:
+  # 订阅列表文件路径。
+  # 容器首次启动时若不存在，会自动生成模板文件。
   file: "./subscription_urls.txt"
 
 probe:
+  # Linux 版 xray 可执行文件路径。
   xray_bin: "../bin/xray-linux-64/xray"
+
+  # 真延迟探测地址。
+  # 推荐保持 generate_204 这类轻量地址。
   probe_url: "https://www.gstatic.com/generate_204"
+
+  # 第一轮真延迟筛选阈值，单位毫秒。
+  # 超过该值的节点会被淘汰。
   phase1_max_delay_ms: 1500
+
+  # 第二轮真延迟筛选阈值，单位毫秒。
+  # 只有两轮都通过的节点才会进入稳定历史池。
   phase2_max_delay_ms: 1000
+
   template:
+    # 测试模板协议，目前常用 vless / trojan。
     protocol: "vless"
+
+    # VLESS 使用的 UUID。
+    # 如果 protocol 是 vless，则必须填写真实值。
     uuid: "replace-with-your-vless-uuid"
+
+    # Trojan 使用的密码。
+    # 如果 protocol 是 trojan，则必须填写真实值。
     password: ""
+
+    # 传输安全层，一般为 tls。
     security: "tls"
+
+    # 传输方式，一般为 ws。
     transport: "ws"
+
+    # TLS SNI。
     sni: "replace-with-your-sni.example.com"
+
+    # WebSocket Host。
     ws_host: "replace-with-your-host.example.com"
+
+    # WebSocket Path。
     ws_path: "/?ed=2048"
 
 output:
+  # 输出目录。
   dir: "../runtime/outputs"
-  name_prefix: "\u3010\u5468\u66f4\u00b7\u7092\u996d\u3011"
+
+  # 节点名称前缀。
+  # 最终会生成类似：
+  # 【周更·炒饭】香港-HK-1
+  # 【周更·炒饭】移动 -1
+  name_prefix: "【周更·炒饭】"
 
 cache:
+  # 历史有效池文件。
+  # 两轮真延迟都通过的节点会写入这里，供下一轮继续参与筛选。
   history_file: "../runtime/cache/history_valid_nodes.txt"
 
 publish:
   kv:
+    # 是否启用 KV 推送。
     enabled: true
+
     categories:
-      "\u9999\u6e2f": 5
-      "\u4e9a\u6d32": 5
-      "\u6b27\u6d32": 5
-      "\u7f8e\u6d32": 5
-      "\u5176\u4ed6\u533a\u57df": 5
-      "\u79fb\u52a8": 0
-      "\u8054\u901a": 0
-      "\u7535\u4fe1": 0
-      "\u5b98\u65b9\u4f18\u9009": 0
+      # 各分类推送到 KV 的数量。
+      # 这里控制的是最终推送数量，不是预筛数量。
+      香港: 5
+      亚洲: 5
+      欧洲: 5
+      美洲: 5
+      其他区域: 5
+      移动: 0
+      联通: 0
+      电信: 0
+      官方优选: 0
 
   dns:
+    # 是否启用 DNS 推送。
     enabled: true
+
     categories:
-      "\u79fb\u52a8": 3
-      "\u8054\u901a": 3
-      "\u7535\u4fe1": 3
-      "\u5b98\u65b9\u4f18\u9009": 3
+      # 各分类写入 DNS 的数量。
+      # 运营商与官方优选通常在这里配置。
+      移动: 3
+      联通: 3
+      电信: 3
+      官方优选: 3
 
 cloudflare:
   worker:
+    # Worker / KV 接口地址。
     url: "https://your-worker.example.workers.dev"
+
+    # Worker 鉴权 token。
     token: "replace-with-your-worker-token"
+
+    # 写入 Worker/KV 的 key 名称。
     key: "ip_asian"
 
   dns:
+    # Cloudflare DNS API Token。
     api_token: "replace-with-your-cloudflare-api-token"
+
+    # Cloudflare Zone ID。
     zone_id: "replace-with-your-zone-id"
-    "\u79fb\u52a8": "cmcc.example.com"
-    "\u8054\u901a": "cu.example.com"
-    "\u7535\u4fe1": "ct.example.com"
-    "\u5b98\u65b9\u4f18\u9009": "official.example.com"
+
+    # 各 DNS 分类对应的域名。
+    移动: "cmcc.example.com"
+    联通: "cu.example.com"
+    电信: "ct.example.com"
+    官方优选: "official.example.com"
