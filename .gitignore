@@ -1,4 +1,4 @@
-﻿runtime/outputs/*
+runtime/outputs/*
 !runtime/outputs/.gitkeep
 runtime/logs/*
 !runtime/logs/.gitkeep

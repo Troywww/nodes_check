@@ -1,4 +1,4 @@
-﻿services:
+services:
   nodes-check:
     build: .
     container_name: nodes-check

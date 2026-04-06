@@ -1,4 +1,4 @@
-﻿# nodes-check
+# nodes-check
 
 `nodes-check` 是一个面向软路由场景的代理节点筛选与 Cloudflare 发布工具。
 

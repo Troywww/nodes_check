@@ -1,4 +1,4 @@
-﻿# One subscription URL per line.
+# One subscription URL per line.
 # Example:
 # https://example.com/subscription-a
 # https://example.com/subscription-b
