@@ -44,15 +44,13 @@
 
 ## 敏感信息说明
 
-仓库中的示例文件已经脱敏：
-- `configs/config.example.yaml`
-- `configs/subscription_urls.txt`
+仓库中的 `configs/config.yaml` 是脱敏后的正式默认配置，可以直接被拉取和挂载使用。
 
 建议做法：
-- 保留 `configs/config.example.yaml` 作为公开示例
-- 本地复制一份自己的 `configs/config.yaml`
-- 本地运行时使用 `-config ./configs/config.yaml`
-- 不要把真实 token、域名、UUID 再写回示例文件
+- 保留仓库里的 `configs/config.yaml` 作为默认模板
+- 在部署前把其中的真实 token、域名、UUID 改成你自己的值
+- 如需保留私有副本，可另建 `configs/*.local.yaml`
+- 不要把真实敏感值提交回仓库
 
 ## 本地运行
 
@@ -85,7 +83,7 @@ sh ./scripts/run-local.sh
 或直接：
 
 ```bash
-go run ./cmd/server -config ./configs/config.example.yaml
+go run ./cmd/server -config ./configs/config.yaml
 ```
 
 默认访问地址：
@@ -113,6 +111,10 @@ docker run -d \
 docker compose up -d --build
 ```
 
+说明：
+- 容器默认读取 `/app/configs/config.yaml`
+- 如果你挂载了 `./configs:/app/configs`，宿主机目录里必须有 `config.yaml`
+
 ### 方式二：飞牛 / NAS 直接拉镜像
 
 更推荐优先使用 Docker Hub 镜像；很多 NAS 对 `docker.io` 的拉取速度通常比 `ghcr.io` 更稳定。
@@ -130,7 +132,7 @@ services:
       - ./configs:/app/configs
       - ./runtime:/app/runtime
     restart: unless-stopped
-    command: ["/app/nodes-check", "-config", "/app/configs/config.example.yaml"]
+    command: ["/app/nodes-check", "-config", "/app/configs/config.yaml"]
 ```
 
 #### GHCR
@@ -146,13 +148,13 @@ services:
       - ./configs:/app/configs
       - ./runtime:/app/runtime
     restart: unless-stopped
-    command: ["/app/nodes-check", "-config", "/app/configs/config.example.yaml"]
+    command: ["/app/nodes-check", "-config", "/app/configs/config.yaml"]
 ```
 
 说明：
-- 这两种方式都不需要 NAS 现场 `build`。
-- 你只需要准备自己的配置目录和运行目录。
-- 如果 GHCR 包默认是私有的，需要先在 GitHub Packages 里把它改成公开。
+- 这两种方式都不需要 NAS 现场 `build`
+- 你只需要准备自己的配置目录和运行目录
+- 如果 GHCR 包默认是私有的，需要先在 GitHub Packages 里把它改成公开
 
 ## GitHub Actions 自动发布镜像
 

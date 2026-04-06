@@ -1,4 +1,4 @@
-﻿FROM golang:1.22-bookworm AS builder
+FROM golang:1.22-bookworm AS builder
 WORKDIR /src
 COPY go.mod go.sum ./
 RUN go mod download
@@ -14,4 +14,5 @@ COPY runtime /app/runtime
 COPY bin/xray-linux-64 /app/bin/xray-linux-64
 RUN chmod +x /app/nodes-check /app/bin/xray-linux-64/xray
 EXPOSE 18808
-CMD ["/app/nodes-check", "-config", "/app/configs/config.example.yaml"]
+CMD ["/app/nodes-check", "-config", "/app/configs/config.yaml"]
+

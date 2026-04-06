@@ -10,5 +10,5 @@ bin/*.zip
 /xray-probe
 /xray-probe.exe
 *.log
-configs/config.yaml
 configs/*.local.yaml
+

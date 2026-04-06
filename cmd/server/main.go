@@ -17,7 +17,7 @@ import (
 )
 
 func main() {
-	configPath := flag.String("config", "./configs/config.example.yaml", "config path")
+	configPath := flag.String("config", "./configs/config.yaml", "config path")
 	once := flag.Bool("once", false, "run pipeline once and exit")
 	flag.Parse()
 
@@ -74,3 +74,4 @@ func main() {
 		os.Exit(1)
 	}
 }
+

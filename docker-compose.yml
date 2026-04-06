@@ -8,4 +8,5 @@ services:
     volumes:
       - ./configs:/app/configs
       - ./runtime:/app/runtime
-    command: ["/app/nodes-check", "-config", "/app/configs/config.example.yaml"]
+    command: ["/app/nodes-check", "-config", "/app/configs/config.yaml"]
+
