@@ -20,6 +20,7 @@
 - 支持 Cloudflare Worker/KV 推送
 - 支持 Cloudflare DNS 推送
 - 支持 Docker 部署
+- 支持 GitHub Actions 自动发布镜像到 GHCR
 
 ## 当前分类规则
 
@@ -37,9 +38,9 @@
 - 官方优选
 
 说明：
-- Cloudflare IP 默认不进入普通大区
-- Cloudflare IP 若未命中移动/联通/电信，会进入 `官方优选`
-- `其他区域` 表示非 Cloudflare IP，但未被归入香港/亚洲/欧洲/美洲
+- Cloudflare IP 默认不进入普通大区。
+- Cloudflare IP 若未命中移动/联通/电信，会进入 `官方优选`。
+- `其他区域` 表示非 Cloudflare IP，但未被归入香港/亚洲/欧洲/美洲。
 
 ## 目录结构
 
@@ -76,18 +77,17 @@ bin/
   xray-windows-64/
 ```
 
-## 发布前的敏感信息说明
+## 敏感信息说明
 
 仓库中的示例文件已经脱敏：
 - `configs/config.example.yaml`
 - `configs/subscription_urls.txt`
 
-上传到 GitHub 前，请确认你本地实际运行时使用的是自己的私有配置，不要把真实值写回示例文件。
-
 建议做法：
 - 保留 `configs/config.example.yaml` 作为公开示例
 - 本地复制一份自己的 `configs/config.yaml`
-- 本地运行时用 `-config ./configs/config.yaml`
+- 本地运行时使用 `-config ./configs/config.yaml`
+- 不要把真实 token、域名、UUID 再写回示例文件
 
 ## 本地运行
 
@@ -130,22 +130,11 @@ go run ./cmd/server -config ./configs/config.example.yaml
 默认访问地址：
 - [http://localhost:18808](http://localhost:18808)
 
-## Docker 运行
+## Docker 部署
 
-### 方式一：docker compose
+### 方式一：本地源码构建
 
-```bash
-docker compose up -d --build
-```
-
-默认映射：
-- `18808:18808`
-
-配置和运行数据通过卷挂载：
-- `./configs -> /app/configs`
-- `./runtime -> /app/runtime`
-
-### 方式二：直接 docker build / run
+适合你自己有源码目录的机器：
 
 ```bash
 docker build -t nodes-check .
@@ -157,27 +146,69 @@ docker run -d \
   nodes-check
 ```
 
-## 一键启动说明
-
-仓库已提供：
-- `scripts/run-local.sh`
-- `scripts/run-local.ps1`
-
-它们会：
-- 编译 `cmd/server`
-- 按配置启动 Web 服务
-
-## 上传 GitHub 前还需要做的事
-
-当前目录还不是 git 仓库。如果你要上传 GitHub，可以在本地执行：
+或：
 
 ```bash
-git init
-git add .
-git commit -m "Initial commit"
+docker compose up -d --build
 ```
 
-然后推送到你的 GitHub 仓库。
+### 方式二：飞牛 / NAS 直接拉镜像
+
+适合飞牛这类只粘贴 `compose`、不直接拿源码构建的场景。
+
+本仓库已提供 GitHub Actions 自动发布镜像到 GHCR：
+- `ghcr.io/troywww/nodes-check:latest`
+
+飞牛可直接使用：
+
+```yaml
+services:
+  nodes-check:
+    image: ghcr.io/troywww/nodes-check:latest
+    container_name: nodes-check
+    ports:
+      - "18808:18808"
+    volumes:
+      - ./configs:/app/configs
+      - ./runtime:/app/runtime
+    restart: unless-stopped
+    command: ["/app/nodes-check", "-config", "/app/configs/config.example.yaml"]
+```
+
+说明：
+- 这种方式不需要飞牛现场 `build`。
+- 你只需要准备自己的 `configs/config.example.yaml` 或 `configs/config.yaml`。
+- 如果 GHCR 包默认是私有的，需要先在 GitHub Packages 里把它改成公开，飞牛才能直接拉取。
+
+## GHCR 自动发布镜像
+
+仓库内置工作流：
+- `.github/workflows/publish-image.yml`
+
+触发方式：
+- push 到 `main`
+- push `v*` 标签
+- 手动触发 `workflow_dispatch`
+
+发布后默认会生成这些标签：
+- `ghcr.io/troywww/nodes-check:latest`
+- `ghcr.io/troywww/nodes-check:sha-...`
+- `ghcr.io/troywww/nodes-check:vX.Y.Z`（打 tag 时）
+
+## Docker Hub
+
+如果你更希望用 Docker Hub，也可以手动发布：
+
+```bash
+docker build -t troywww/nodes-check:latest .
+docker push troywww/nodes-check:latest
+```
+
+之后飞牛里的 `compose` 就改成：
+
+```yaml
+image: troywww/nodes-check:latest
+```
 
 ## 说明
 

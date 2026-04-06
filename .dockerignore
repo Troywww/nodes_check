@@ -1,0 +1,23 @@
+# Git
+.git
+.gitignore
+.github
+
+# Local build outputs
+/server
+/server.exe
+/xray-probe
+/xray-probe.exe
+*.log
+
+# Runtime mutable data
+runtime/cache/history_valid_nodes.txt
+runtime/outputs/final_ips.txt
+
+# Local/private configs
+configs/config.yaml
+configs/*.local.yaml
+
+# Unused archives / platform binaries for Linux image build
+bin/*.zip
+bin/xray-windows-64
